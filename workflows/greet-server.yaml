@@ -1,7 +1,6 @@
-command: ["/bin/sh", "-c"]
+command: ["python3", "-u", "-c"]
           args:
             - |
-              cat > /app.py << 'EOF'
               from http.server import BaseHTTPRequestHandler, HTTPServer
               import json
 
@@ -10,7 +9,7 @@ command: ["/bin/sh", "-c"]
                       self.send_response(200)
                       self.send_header("Content-Type", "application/json")
                       self.end_headers()
-                      self.wfile.write(json.dumps({"status": "alive", "message": "Hello from SAP AI Core serving"}).encode())
+                      self.wfile.write(json.dumps({"status": "alive"}).encode())
 
                   def do_POST(self):
                       n = int(self.headers.get("Content-Length", 0))
@@ -26,5 +25,3 @@ command: ["/bin/sh", "-c"]
                       self.wfile.write(json.dumps({"greeting": "Hello, " + name + " - served live by SAP AI Core"}).encode())
 
               HTTPServer(("0.0.0.0", 9001), H).serve_forever()
-              EOF
-              python3 -u /app.py
