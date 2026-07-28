@@ -6,19 +6,27 @@ metadata:
     scenarios.ai.sap.com/name: "my-first-scenario"
     scenarios.ai.sap.com/description: "Hello world sandbox scenario"
     executables.ai.sap.com/name: "first-pipeline"
-    executables.ai.sap.com/description: "Prints hello from AI Core"
+    executables.ai.sap.com/description: "Prints a parameterized greeting"
   labels:
     scenarios.ai.sap.com/id: "learning"
-    ai.sap.com/version: "1.0"
+    ai.sap.com/version: "1.1"
 spec:
   imagePullSecrets: []
   entrypoint: mypipeline
+  arguments:
+    parameters:
+      - name: greetname
+        description: "Who should be greeted"
   templates:
     - name: mypipeline
       metadata:
         labels:
           ai.sap.com/resourcePlan: starter
+      steps:
+        - - name: greet
+            template: greeter
+    - name: greeter
       container:
         image: docker.io/python:3.11-slim
         command: ["python", "-c"]
-        args: ["print('Hello from SAP AI Core')"]
+        args: ["print('Hello, {{workflow.parameters.greetname}} — from SAP AI Core')"]
