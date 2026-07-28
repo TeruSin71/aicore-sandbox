@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: first-pipeline
+  annotations:
+    scenarios.ai.sap.com/name: "my-first-scenario"
+    scenarios.ai.sap.com/description: "Hello world sandbox scenario"
+    executables.ai.sap.com/name: "first-pipeline"
+    executables.ai.sap.com/description: "Prints hello from AI Core"
+  labels:
+    scenarios.ai.sap.com/id: "learning"
+    ai.sap.com/version: "1.0"
+spec:
+  imagePullSecrets: []
+  entrypoint: mypipeline
+  templates:
+    - name: mypipeline
+      metadata:
+        labels:
+          ai.sap.com/resourcePlan: starter
+      container:
+        image: docker.io/python:3.11-slim
+        command: ["python", "-c"]
+        args: ["print('Hello from SAP AI Core')"]
