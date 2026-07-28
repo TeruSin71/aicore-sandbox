@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: artifact-pipeline
+  annotations:
+    scenarios.ai.sap.com/name: "my-first-scenario"
+    scenarios.ai.sap.com/description: "Hello world sandbox scenario"
+    executables.ai.sap.com/name: "artifact-pipeline"
+    executables.ai.sap.com/description: "Writes an output artifact to object store"
+    artifacts.ai.sap.com/greetfile.kind: "model"
+  labels:
+    scenarios.ai.sap.com/id: "learning"
+    ai.sap.com/version: "1.0"
+spec:
+  imagePullSecrets: []
+  entrypoint: mypipeline
+  arguments:
+    parameters:
+      - name: greetname
+        description: "Who should be greeted"
+  templates:
+    - name: mypipeline
+      metadata:
+        labels:
+          ai.sap.com/resourcePlan: starter
+      outputs:
+        artifacts:
+          - name: greetfile
+            globalName: greetfile
+            path: /tmp/output
+            archive:
+              none: {}
+      container:
+        image: docker.io/python:3.11-slim
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            mkdir -p /tmp/output
+            python -c "print('writing artifact...')"
+            echo "Hello, {{workflow.parameters.greetname}} — persisted by SAP AI Core" > /tmp/output/greeting.txt
+            cat /tmp/output/greeting.txt
