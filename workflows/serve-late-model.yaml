@@ -1,0 +1,50 @@
+apiVersion: ai.sap.com/v1alpha1
+kind: ServingTemplate
+metadata:
+  name: serve-late-model
+  annotations:
+    scenarios.ai.sap.com/name: "late-delivery"
+    scenarios.ai.sap.com/description: "Predict late goods issue for SD order items"
+    executables.ai.sap.com/name: "serve-late-model"
+    executables.ai.sap.com/description: "REST endpoint serving the late-delivery model"
+    artifacts.ai.sap.com/modelin.kind: "model"
+  labels:
+    scenarios.ai.sap.com/id: "sd-analytics"
+    ai.sap.com/version: "1.0"
+spec:
+  inputs:
+    artifacts:
+      - name: modelin
+  template:
+    apiVersion: "serving.kserve.io/v1beta1"
+    metadata:
+      annotations: |
+        autoscaling.knative.dev/metric: concurrency
+        autoscaling.knative.dev/target: 1
+        autoscaling.knative.dev/targetBurstCapacity: 0
+      labels: |
+        ai.sap.com/resourcePlan: starter
+    spec: |
+      predictor:
+        imagePullSecrets: []
+        minReplicas: 1
+        maxReplicas: 1
+        containers:
+        - name: kserve-container
+          image: docker.io/python:3.11-slim
+          ports:
+          - containerPort: 9001
+            protocol: TCP
+          env:
+          - name: STORAGE_URI
+            value: "{{inputs.artifacts.modelin}}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              export HOME=/tmp
+              mkdir -p /tmp/libs
+              pip install --quiet --no-cache-dir --target=/tmp/libs pandas scikit-learn joblib
+              export PYTHONPATH=/tmp/libs
+              python3 -c "import urllib.request; urllib.request.urlretrieve('https://raw.githubusercontent.com/TeruSin71/aicore-scripts/main/serve.py','/tmp/serve.py')"
+              python3 -u /tmp/serve.py
