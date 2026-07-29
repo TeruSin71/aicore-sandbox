@@ -34,7 +34,7 @@ spec:
         artifacts:
           - name: latemodel
             globalName: latemodel
-            path: /model
+            path: /tmp/model      # was /model
             archive:
               none: {}
       container:
