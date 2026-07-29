@@ -11,7 +11,7 @@ metadata:
     artifacts.ai.sap.com/latemodel.kind: "model"
   labels:
     scenarios.ai.sap.com/id: "sd-analytics"
-    ai.sap.com/version: "1.0"
+    ai.sap.com/version: "1.1"
 spec:
   imagePullSecrets: []
   entrypoint: trainpipeline
@@ -34,7 +34,7 @@ spec:
         artifacts:
           - name: latemodel
             globalName: latemodel
-            path: /tmp/model      # was /model
+            path: /tmp/model
             archive:
               none: {}
       container:
@@ -44,12 +44,14 @@ spec:
             value: "{{workflow.parameters.n_estimators}}"
           - name: MIN_SAMPLES_LEAF
             value: "{{workflow.parameters.min_samples_leaf}}"
+          - name: MODEL_DIR
+            value: "/tmp/model"
         command: ["/bin/sh", "-c"]
         args:
           - |
             set -e
             export HOME=/tmp
-            mkdir -p /model /tmp/libs
+            mkdir -p /tmp/model /tmp/libs
             pip install --quiet --no-cache-dir --target=/tmp/libs pandas scikit-learn joblib
             export PYTHONPATH=/tmp/libs
             python3 -c "import urllib.request; urllib.request.urlretrieve('https://raw.githubusercontent.com/TeruSin71/aicore-scripts/main/train.py','/tmp/train.py')"
