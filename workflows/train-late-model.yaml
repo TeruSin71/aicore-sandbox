@@ -48,6 +48,9 @@ spec:
         args:
           - |
             set -e
-            pip install --quiet --no-cache-dir pandas scikit-learn joblib
-            curl -sSL -o /tmp/train.py https://raw.githubusercontent.com/TeruSin71/aicore-scripts/main/train.py
+            export HOME=/tmp
+            mkdir -p /model /tmp/libs
+            pip install --quiet --no-cache-dir --target=/tmp/libs pandas scikit-learn joblib
+            export PYTHONPATH=/tmp/libs
+            python3 -c "import urllib.request; urllib.request.urlretrieve('https://raw.githubusercontent.com/TeruSin71/aicore-scripts/main/train.py','/tmp/train.py')"
             python3 -u /tmp/train.py
